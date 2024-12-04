@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Папка, в которой будут храниться все медиафайлы (изображения)
 MEDIA_URL = '/media/'
 
@@ -62,8 +63,10 @@ ROOT_URLCONF = 'flower_shop.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),  # Эта строка позволяет Django искать шаблоны в корневой папке templates
+        ],
+        'APP_DIRS': True,  # Это важно! Оно позволяет искать шаблоны внутри приложений
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',

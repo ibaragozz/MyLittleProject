@@ -15,12 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from bouquets import views
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path, include  # Подключаем include для подключения urls приложений
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('', include('bouquets.urls')),  # Подключаем маршруты из приложения bouquets
+]
