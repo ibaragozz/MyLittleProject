@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12 цветочных месяцев</title>
+</head>
+<body>
+    <h1>12 цветочных месяцев</h1>
+    <div class="bouquet-container">
+        {% for bouquet in bouquets %}
+            <div class="bouquet-card">
+                <img src="{{ bouquet.image.url }}" alt="{{ bouquet.name }}">
+                <h2>{{ bouquet.name }}</h2>
+                <p>{{ bouquet.description }}</p>
+                <p><strong>Цена: {{ bouquet.price }} руб.</strong></p>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
