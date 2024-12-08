@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Профиль пользователя</h2>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Имя пользователя: {{ user.username }}</h5>
+            <p class="card-text">Электронная почта: {{ user.email }}</p>
+            <p class="card-text">Телефон: {{ user.profile.phone }}</p>  <!-- Здесь позже добавим телефон -->
+            <p class="card-text">Адрес: {{ user.profile.address }}</p>  <!-- Здесь позже добавим адрес -->
+        </div>
+    </div>
+
+    <div class="mt-4 text-center">
+        <a href="{% url 'edit_profile' %}" class="btn btn-primary">Редактировать профиль</a>
+    </div>
+</div>
+{% endblock %}

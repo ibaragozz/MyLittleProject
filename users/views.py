@@ -2,6 +2,8 @@ from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import RegisterForm
+from django.contrib.auth.decorators import login_required
+
 
 def register(request):
     if request.method == 'POST':
@@ -36,3 +38,8 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('home')  # Перенаправление на главную страницу
+
+@login_required
+def profile_view(request):
+    user = request.user  # Получаем текущего пользователя
+    return render(request, 'users/profile.html', {'user': user})
