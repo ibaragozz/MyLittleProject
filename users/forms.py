@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
-    phone = forms.CharField(max_length=15, required=True)
-    address = forms.CharField(max_length=255, required=True)
+    phone = forms.CharField(max_length=15, required=True)  # добавь поле для телефона
+    address = forms.CharField(max_length=255, required=True)  # добавь поле для адреса
 
     class Meta:
         model = User
