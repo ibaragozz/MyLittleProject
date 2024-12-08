@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import RegisterForm
 from django.contrib.auth.decorators import login_required
-
+from .forms import ProfileForm
+from .forms import UserProfile
 
 def register(request):
     if request.method == 'POST':
@@ -40,6 +41,18 @@ def logout_view(request):
     return redirect('home')  # Перенаправление на главную страницу
 
 @login_required
+def profile(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, instance=request.user.userprofile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')  # редирект на страницу профиля
+    else:
+        form = ProfileForm(instance=request.user.userprofile)
+    return render(request, 'users/profile.html', {'form': form})
+
+@login_required
 def profile_view(request):
-    user = request.user  # Получаем текущего пользователя
-    return render(request, 'users/profile.html', {'user': user})
+    # Получаем профиль пользователя (если он существует)
+    profile = UserProfile.objects.get(user=request.user)
+    return render(request, 'users/profile.html', {'profile': profile})
