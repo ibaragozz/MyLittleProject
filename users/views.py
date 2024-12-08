@@ -27,6 +27,5 @@ def login_view(request):
     return render(request, 'users/login.html', {'form': form})
 
 def logout_view(request):
-    if request.method == 'POST':  # Только POST запрос
-        logout(request)  # Выход из системы
-        return redirect('home')  # Перенаправление на главную страницу
+    logout(request)
+    return redirect('home')  # Перенаправление на главную страницу

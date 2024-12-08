@@ -64,9 +64,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),  # Эта строка позволяет Django искать шаблоны в корневой папке templates
+            BASE_DIR / 'templates',  # указывает на папку templates в корне проекта
         ],
-        'APP_DIRS': True,  # Это важно! Оно позволяет искать шаблоны внутри приложений
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
