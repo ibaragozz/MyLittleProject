@@ -8,12 +8,11 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Сохраняем пользователя
-            login(request, user)  # Авторизуем пользователя сразу после регистрации
-            messages.success(request, "Вы успешно зарегистрированы! Пожалуйста, войдите.")  # Сообщение об успешной регистрации
-            return redirect('home')  # Редирект на главную страницу после регистрации
+            user = form.save()
+            messages.success(request, "Вы успешно зарегистрированы! Пожалуйста, войдите.")
+            return redirect('login')
     else:
-        form = RegisterForm()  # Если это GET-запрос, показываем пустую форму
+        form = RegisterForm()
 
     return render(request, 'users/register.html', {'form': form})  # Рендерим страницу с формой регистрации
 
