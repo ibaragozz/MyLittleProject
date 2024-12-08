@@ -1,35 +1,32 @@
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from .forms import UserRegisterForm
+from .forms import RegisterForm
 
 def register(request):
     if request.method == 'POST':
-        form = UserRegisterForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Аккаунт создан для {username}!')
-            return redirect('login')
+            user = form.save()  # Сохраняем пользователя
+            login(request, user)  # Авторизуем пользователя сразу после регистрации
+            return redirect('home')  # Перенаправление на главную страницу
     else:
-        form = UserRegisterForm()
+        form = RegisterForm()
+
     return render(request, 'users/register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            return redirect('home')  # на главную страницу после входа
-        else:
-            messages.error(request, 'Неверное имя пользователя или пароль')
-    return render(request, 'users/login.html')
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'users/login.html', {'form': form})
 
 def logout_view(request):
-    logout(request)
-    return redirect('home')  # перенаправляем на главную после выхода
-from django.shortcuts import render
-
-# Create your views here.
+    if request.method == 'POST':  # Только POST запрос
+        logout(request)  # Выход из системы
+        return redirect('home')  # Перенаправление на главную страницу
