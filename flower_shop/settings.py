@@ -130,6 +130,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
+# Формат чисел (1000 -> 1,000)
+USE_THOUSAND_SEPARATOR = True
+
+# Опционально: если хотите рубль вместо запятой
+USE_L10N = True  # Локализация (форматы дат, чисел для региона)
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -139,3 +145,5 @@ LOGIN_REDIRECT_URL = 'home'  # на главную страницу после �
 LOGOUT_REDIRECT_URL = 'home'  # на главную страницу после выхода.
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+#AUTH_USER_MODEL = 'users.User'

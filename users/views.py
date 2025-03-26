@@ -10,7 +10,7 @@ def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            form.save()
             messages.success(request, "Вы успешно зарегистрированы! Пожалуйста, войдите.")
             return redirect('login')
     else:

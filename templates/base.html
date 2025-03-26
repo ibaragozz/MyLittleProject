@@ -8,51 +8,98 @@
     <!-- Подключаем Bootstrap для оформления -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Подключаем иконки Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
 <body>
     <header>
     <!-- Навигация -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">Главная</a>
+            <a class="navbar-brand" href="{% url 'bouquets:home' %}">12 цветочных месяцев</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Главная</a>
+                        <a class="nav-link" href="{% url 'bouquets:home' %}">
+                            <i class="bi bi-house"></i> Главная
+                        </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'bouquets:catalog' %}">
+                            <i class="bi bi-flower1"></i> Каталог
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'bouquets:view_cart' %}">
+                            <i class="bi bi-cart"></i> Корзина
+                            {% if user.is_authenticated and user.cart.items.count > 0 %}
+                            <span class="badge bg-danger rounded-pill">
+                                {{ user.cart.items.count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
+                            <a class="nav-link" href="{% url 'users:profile' %}">
+                                <i class="bi bi-person"></i> Профиль
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Выйти
+                            </a>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
+                            <a class="nav-link" href="{% url 'users:register' %}">
+                                <i class="bi bi-person-plus"></i> Регистрация
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Вход</a>
+                            <a class="nav-link" href="{% url 'users:login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Вход
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
-
     </header>
 
-    <div class="container mt-5">
+    <main class="container mt-4">
+        <!-- Вывод сообщений -->
+        {% if messages %}
+        <div class="alert-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         {% block content %}
         <!-- Уникальный контент каждой страницы будет подставляться сюда -->
         {% endblock %}
-    </div>
+    </main>
 
-    <footer>
-        <p>&copy; 2024 12 цветочных месяцев</p>
+    <footer class="bg-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2024 12 цветочных месяцев</p>
+        </div>
     </footer>
 
     <!-- Подключаем Bootstrap JS для интерактивности -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Подключаем кастомные скрипты -->
+    <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>

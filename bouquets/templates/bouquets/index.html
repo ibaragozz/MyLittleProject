@@ -1,23 +1,44 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Главная страница
-{% endblock %}
+{% block title %}Каталог букетов{% endblock %}
 
 {% block content %}
-<h1 class="text-center">12 цветочных месяцев</h1>
-<div class="row">
-    {% for bouquet in bouquets %}
-    <div class="col-md-3 mb-4">
-        <div class="card">
-            <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}">
-            <div class="card-body">
-                <h5 class="card-title">{{ bouquet.name }}</h5>
-                <p class="card-text">{{ bouquet.description }}</p>
-                <p class="card-text"><strong>Цена: {{ bouquet.price }} ₽</strong></p>
+<div class="container mt-4">
+    <!-- Кнопка корзины в шапке -->
+    <div class="d-flex justify-content-end mb-4">
+        <a href="{% url 'bouquets:view_cart' %}" class="btn btn-primary position-relative">
+            Корзина
+            {% if request.user.cart.items.count > 0 %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {{ request.user.cart.items.count }}
+            </span>
+            {% endif %}
+        </a>
+    </div>
+
+    <h1 class="text-center mb-4">12 цветочных месяцев</h1>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for bouquet in bouquets %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ bouquet.image.url }}" class="card-img-top" alt="{{ bouquet.name }}" style="height: 250px; object-fit: cover;">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ bouquet.name }}</h5>
+                    <p class="card-text flex-grow-1">{{ bouquet.description|truncatechars:100 }}</p>
+                    <div class="mt-auto">
+                        <p class="h5 text-end">{{ bouquet.price|floatformat:"0" }} ₽</p>
+                        <form action="{% url 'bouquets:add_to_cart' bouquet.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-cart-plus"></i> Добавить в корзину
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}
