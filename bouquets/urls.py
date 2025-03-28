@@ -15,6 +15,8 @@ urlpatterns = [
     path('cart/remove/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('cart/update/<int:item_id>/', views.update_cart_item, name='update_cart_item'),
     path('cart/clear/', views.clear_cart, name='clear_cart'),
+    path('order/create/', views.create_order, name='create_order'),
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
 
     # Маршруты для API (опционально)
     # path('api/cart/', views.cart_api, name='cart_api'),
