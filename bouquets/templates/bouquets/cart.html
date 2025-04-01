@@ -128,9 +128,12 @@
                 <a href="{% url 'bouquets:clear_cart' %}" class="btn btn-danger">
                     <i class="bi bi-trash"></i> Очистить корзину
                 </a>
-                <a href="#" class="btn btn-success">
-                    Оформить заказ
-                </a>
+                <form method="post" action="{% url 'bouquets:create_order' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success w-100" {% if not cart.items.all %}disabled{% endif %}>
+                        <i class="bi bi-cart-check"></i> Оформить заказ
+                    </button>
+                </form>
             </div>
         </div>
     </div>

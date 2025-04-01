@@ -18,6 +18,7 @@ urlpatterns = [
     path('order/create/', views.create_order, name='create_order'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
 
+    path('test-order/', views.test_order, name='test_order'), # Временный тестовый URL
     # Маршруты для API (опционально)
     # path('api/cart/', views.cart_api, name='cart_api'),
     # path('api/cart/add/', views.add_to_cart_api, name='add_to_cart_api'),

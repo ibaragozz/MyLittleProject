@@ -6,8 +6,8 @@ from django.views.generic import RedirectView  # Добавьте этот им�
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('bouquets.urls')),  # Ваше приложение с главной страницей
-    path('users/', include('users.urls')),
+    path('', include('bouquets.urls', namespace='bouquets')),  # Явно указываем namespace
+    path('users/', include('users.urls', namespace='users')),
 
     # Добавьте fallback-редирект для админки
     path('', RedirectView.as_view(url='bouquets/', permanent=False)),

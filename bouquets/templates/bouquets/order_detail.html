@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0">Заказ #{{ order.id }} успешно оформлен!</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Детали заказа</h4>
+                    <p><strong>Дата:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+                    <p><strong>Статус:</strong> В обработке</p>
+                    <p><strong>Адрес доставки:</strong> {{ order.delivery_address }}</p>
+                    <p><strong>Телефон:</strong> {{ order.phone }}</p>
+                    {% if order.comment %}
+                    <p><strong>Комментарий:</strong> {{ order.comment }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h4>Состав заказа</h4>
+                    <ul class="list-group mb-3">
+                        {% for item in order.items.all %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ item.bouquet.name }} × {{ item.quantity }}</span>
+                            <span>{{ item.price|floatformat:"0" }} ₽</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="text-end fw-bold fs-5">
+                        Итого: {{ order.total_price|floatformat:"0" }} ₽
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-center">
+            <a href="{% url 'bouquets:catalog' %}" class="btn btn-primary">
+                Вернуться в каталог
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
