@@ -5,7 +5,7 @@ app_name = 'bouquets'
 
 urlpatterns = [
     # Основные маршруты
-    path('', views.index, name='home'),  # Теперь это bouquets:home
+    path('', views.index, name='home'),
     path('catalog/', views.index, name='catalog'),
     path('cart/', views.view_cart, name='view_cart'),
 

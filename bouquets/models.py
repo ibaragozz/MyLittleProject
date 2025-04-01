@@ -44,10 +44,30 @@ class Cart(models.Model):
     def total_price(self):
         return sum(item.subtotal for item in self.items.all())
 
+    def add_item(self, bouquet):
+        """
+        Добавляет товар в корзину или увеличивает количество, если товар уже есть.
+        Возвращает (CartItem, created), где created — True, если товар был добавлен впервые.
+        """
+        cart_item, created = CartItem.objects.get_or_create(
+            cart=self,
+            bouquet=bouquet,
+            defaults={'quantity': 1}
+        )
+        if not created:
+            cart_item.quantity += 1
+            cart_item.save()
+        return cart_item, created
+
+    def clear(self):
+        """Очищает корзину"""
+        self.items.all().delete()
+
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     bouquet = models.ForeignKey(Bouquet, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.quantity} x {self.bouquet.name}"

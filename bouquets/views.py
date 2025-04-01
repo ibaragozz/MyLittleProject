@@ -1,28 +1,27 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Bouquet, Cart, CartItem
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Order, OrderItem
+from django.conf import settings
+import requests
+from .models import Bouquet, Cart, CartItem, Order, OrderItem
+from .forms import OrderForm
+from django.db import transaction
 
 def index(request):
     """Отображение каталога букетов"""
     bouquets = Bouquet.objects.filter(is_active=True)
     return render(request, 'bouquets/index.html', {
         'bouquets': bouquets,
-        'title': 'Каталог букетов'
+        'user': request.user
     })
 
 
 @login_required
 def add_to_cart(request, bouquet_id):
-    """
-    Добавление товара в корзину с использованием нового метода модели Cart
-    """
+    """Добавление товара в корзину"""
     bouquet = get_object_or_404(Bouquet, id=bouquet_id)
     cart, _ = Cart.objects.get_or_create(user=request.user)
 
-    # Используем новый метод add_item вместо прямого создания CartItem
     item, created = cart.add_item(bouquet)
 
     messages.success(
@@ -34,9 +33,7 @@ def add_to_cart(request, bouquet_id):
 
 @login_required
 def remove_from_cart(request, item_id):
-    """
-    Удаление товара из корзины
-    """
+    """Удаление товара из корзины"""
     cart_item = get_object_or_404(
         CartItem,
         id=item_id,
@@ -51,9 +48,7 @@ def remove_from_cart(request, item_id):
 
 @login_required
 def update_cart_item(request, item_id):
-    """
-    Обновление количества товара через методы increase/decrease_quantity
-    """
+    """Обновление количества товара"""
     if request.method == 'POST':
         cart_item = get_object_or_404(
             CartItem,
@@ -61,34 +56,34 @@ def update_cart_item(request, item_id):
             cart__user=request.user
         )
         action = request.POST.get('action')
+        quantity = int(request.POST.get('quantity', cart_item.quantity))
 
         if action == 'increase':
-            cart_item.increase_quantity()
-            msg = "Количество увеличено"
+            cart_item.quantity += 1
         elif action == 'decrease':
-            cart_item.decrease_quantity()
-            msg = "Количество уменьшено"
-        else:
-            # Обработка прямого ввода количества
-            quantity = int(request.POST.get('quantity', 1))
-            if quantity > 0:
-                cart_item.quantity = quantity
-                cart_item.save()
-                msg = "Количество обновлено"
+            if cart_item.quantity > 1:
+                cart_item.quantity -= 1
             else:
                 cart_item.delete()
-                msg = "Товар удален"
+                messages.success(request, "Товар удалён из корзины")
+                return redirect('bouquets:view_cart')
+        else:
+            if quantity >= 1:
+                cart_item.quantity = quantity
+            else:
+                cart_item.delete()
+                messages.success(request, "Товар удалён из корзины")
+                return redirect('bouquets:view_cart')
 
-        messages.success(request, msg)
+        cart_item.save()
+        messages.success(request, "Количество обновлено")
 
     return redirect('bouquets:view_cart')
 
 
 @login_required
 def view_cart(request):
-    """
-    Просмотр корзины с автоматическим подсчетом суммы
-    """
+    """Просмотр корзины"""
     cart = get_object_or_404(Cart, user=request.user)
     return render(request, 'bouquets/cart.html', {
         'cart': cart,
@@ -98,31 +93,116 @@ def view_cart(request):
 
 @login_required
 def clear_cart(request):
-    """
-    Очистка корзины через метод clear() модели Cart
-    """
+    """Очистка корзины"""
     cart = get_object_or_404(Cart, user=request.user)
-    cart.clear()  # Используем новый метод вместо items.all().delete()
-
+    cart.clear()
     messages.success(request, "Корзина очищена")
     return redirect('bouquets:view_cart')
 
+
+def send_telegram_notification(order):
+    """Отправка уведомления в Telegram"""
+    try:
+        items_text = "\n".join(
+            f"• {item.bouquet.name} × {item.quantity} = {item.price * item.quantity}₽"
+            for item in order.items.all()
+        )
+
+        message = (
+            f"🛍 *Новый заказ #{order.id}*\n"
+            f"👤 Клиент: {order.user.username}\n"
+            f"📞 Телефон: {order.phone}\n"
+            f"🏠 Адрес: {order.delivery_address}\n"
+            f"💐 Состав:\n{items_text}\n"
+            f"💵 Итого: {order.total_price}₽\n"
+            f"📝 Комментарий: {order.comment or 'нет'}"
+        )
+        print(f"\n=== Тестовое сообщение для Telegram ===\n{message}\n=====================\n")
+        response = requests.post(
+            f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={
+                'chat_id': settings.TELEGRAM_CHAT_ID,
+                'text': message,
+                'parse_mode': 'Markdown'
+            },
+            timeout=5
+        )
+        response.raise_for_status()
+        return True
+    except Exception as e:
+        print(f"Ошибка отправки в Telegram: {e}")
+        return False
+
+
 @login_required
 def create_order(request):
-    """Заглушка для страницы оформления заказа"""
+    """Оформление заказа с отправкой в Telegram"""
+    cart = get_object_or_404(Cart, user=request.user)
+
+    print("\n=== 1. Начало создания заказа ===")
+
+    if not cart.items.exists():
+        messages.error(request, "Корзина пуста!")
+        return redirect('bouquets:view_cart')
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            try:
+                print("=== 2. Форма валидна ===")
+
+                with transaction.atomic():
+                    # Создаем заказ
+                    order = form.save(commit=False)
+                    order.user = request.user
+                    order.total_price = cart.total_price
+                    order.save()
+
+                    print(f"=== 3. Заказ #{order.id} создан ===")
+
+                    # Переносим товары
+                    for item in cart.items.all():
+                        OrderItem.objects.create(
+                            order=order,
+                            bouquet=item.bouquet,
+                            quantity=item.quantity,
+                            price=item.bouquet.price
+                        )
+
+                    print("=== 4. Товары перенесены ===")
+                    # Отправляем в Telegram
+                    if not send_telegram_notification(order):
+                        messages.warning(request, "Заказ создан, но не отправлен в Telegram")
+
+                    telegram_result = send_telegram_notification(order)
+                    print(f"=== 5. Результат отправки в Telegram: {telegram_result} ===")
+
+                    # Очищаем корзину
+                    cart.clear()
+
+                    messages.success(request, f"Заказ #{order.id} оформлен! Проверьте Telegram.")
+                    return redirect('bouquets:order_detail', order_id=order.id)
+
+            except Exception as e:
+                print(f"=== ОШИБКА: {str(e)} ===")
+                messages.error(request, f"Ошибка оформления заказа: {str(e)}")
+                return redirect('bouquets:view_cart')
+    else:
+        form = OrderForm()
+
     return render(request, 'bouquets/create_order.html', {
-        'message': 'Форма оформления заказа будет здесь'
+        'form': form,
+        'cart': cart
     })
+
 
 @login_required
 def order_detail(request, order_id):
-    """
-    Просмотр деталей конкретного заказа
-    """
+    """Просмотр деталей заказа"""
     order = get_object_or_404(
-        Order,  # Убедитесь, что модель Order импортирована
+        Order,
         id=order_id,
-        user=request.user  # Пользователь может видеть только свои заказы
+        user=request.user
     )
     return render(request, 'bouquets/order_detail.html', {
         'order': order,

@@ -22,7 +22,7 @@
                     {% endif %}
 
                     <!-- Форма регистрации -->
-                    <form method="POST" action="{% url 'register' %}">
+                    <form method="POST" action="{% url 'users:register' %}">
                         {% csrf_token %}
 
                         <!-- Имя пользователя -->
@@ -124,7 +124,7 @@
                     </form>
 
                     <div class="mt-3 text-center">
-                        <p>Уже есть аккаунт? <a href="{% url 'login' %}" class="text-decoration-none">Войти</a></p>
+                        <p>Уже есть аккаунт? <a href="{% url 'users:login' %}" class="text-decoration-none">Войти</a></p>
                     </div>
                 </div>
             </div>

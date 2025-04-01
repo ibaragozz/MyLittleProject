@@ -4,17 +4,19 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Кнопка корзины в шапке -->
+    <!-- Кнопка корзины в шапке (только для авторизованных) -->
+    {% if user.is_authenticated %}
     <div class="d-flex justify-content-end mb-4">
         <a href="{% url 'bouquets:view_cart' %}" class="btn btn-primary position-relative">
-            Корзина
-            {% if request.user.cart.items.count > 0 %}
+            <i class="bi bi-cart"></i> Корзина
+            {% if user.cart.items.count > 0 %}
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {{ request.user.cart.items.count }}
+                {{ user.cart.items.count }}
             </span>
             {% endif %}
         </a>
     </div>
+    {% endif %}
 
     <h1 class="text-center mb-4">12 цветочных месяцев</h1>
 
@@ -28,12 +30,18 @@
                     <p class="card-text flex-grow-1">{{ bouquet.description|truncatechars:100 }}</p>
                     <div class="mt-auto">
                         <p class="h5 text-end">{{ bouquet.price|floatformat:"0" }} ₽</p>
+                        {% if user.is_authenticated %}
                         <form action="{% url 'bouquets:add_to_cart' bouquet.id %}" method="post">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-primary w-100">
                                 <i class="bi bi-cart-plus"></i> Добавить в корзину
                             </button>
                         </form>
+                        {% else %}
+                        <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-box-arrow-in-right"></i> Войдите для покупок
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

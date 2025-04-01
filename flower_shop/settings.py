@@ -141,9 +141,12 @@ USE_L10N = True  # Локализация (форматы дат, чисел д�
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = 'home'  # на главную страницу после входа
-LOGOUT_REDIRECT_URL = 'home'  # на главную страницу после выхода.
+LOGIN_REDIRECT_URL = 'bouquets:home'  # на главную страницу после входа
+LOGOUT_REDIRECT_URL = 'bouquets:home'  # Перенаправлять на главную после выхода  # на главную страницу после выхода.
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 #AUTH_USER_MODEL = 'users.User'
+
+TELEGRAM_BOT_TOKEN = '7580776936:AAFsSOmGYGxxi9Q_S-jGOPrAY6etRovZyqw'  # Токен из @BotFather
+TELEGRAM_CHAT_ID = '902211952'  # ID вашего личного чата с ботом
